@@ -127,6 +127,7 @@ function TodoController({ children }: TodoControllerProps) {
     setSubjects([]);
   }, []);
 
+  // 렌더링 최적화 위해 리팩터링 필요
   const handleChangeTodoSubject = useCallback(
     (key: "UP" | "DOWN", todoId: ITodo["id"], subjects: ISubject[]) => {
       const subjectId = todos.find((todo) => todo.id === todoId)?.subjectId;
