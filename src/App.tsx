@@ -3,7 +3,6 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import StartPage from "@pages/index";
 
 function App() {
-
   return (
     <GlobalPortal.Provider>
       <Routes>
