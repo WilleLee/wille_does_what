@@ -1,7 +1,3 @@
-import React from "react";
-
-type Props = {};
-
-export default function StartPage({}: Props) {
+export default function StartPage() {
   return <div>start</div>;
 }
