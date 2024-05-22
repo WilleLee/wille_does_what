@@ -27,17 +27,20 @@ export default function StartPage() {
         subjects,
         onAddSubject,
         onAddTodo,
+        onRemoveTodo,
         onSelectFilter,
         onChangeTodoTitle,
         onChangeSubjectTitle,
         onToggleTodoDone,
         onChangeTodoSubject,
         onRemoveSubjectAndTodos,
+        onReset,
       }) => (
         <>
           <TodoHeader
             onAddSubject={onAddSubject}
             onSelectFilter={onSelectFilter}
+            onReset={onReset}
           />
           {subjects.map((subject) => (
             <Fragment key={subject.id}>
@@ -57,6 +60,7 @@ export default function StartPage() {
                     onChangeTodoTitle={onChangeTodoTitle}
                     onToggleTodoDone={onToggleTodoDone}
                     onChangeTodoSubject={onChangeTodoSubject}
+                    onRemoveTodo={onRemoveTodo}
                   />
                 ))}
             </Fragment>
@@ -72,6 +76,7 @@ interface TodoControllerChildrenProps {
   subjects: ISubject[];
   onAddSubject: () => void;
   onAddTodo: (subjectId: ISubject["id"]) => void;
+  onRemoveTodo: (todoId: ITodo["id"]) => void;
   onSelectFilter: (key: ITodoFilter) => void;
   onChangeTodoTitle: (
     e: ChangeEvent<HTMLInputElement>,
@@ -82,8 +87,13 @@ interface TodoControllerChildrenProps {
     e: ChangeEvent<HTMLInputElement>,
     subjectId: ISubject["id"],
   ) => void;
-  onChangeTodoSubject: (key: "UP" | "DOWN", todoId: ITodo["id"]) => void;
+  onChangeTodoSubject: (
+    key: "UP" | "DOWN",
+    todoId: ITodo["id"],
+    subjects: ISubject[],
+  ) => void;
   onRemoveSubjectAndTodos: (subjectId: ISubject["id"]) => void;
+  onReset: () => void;
 }
 
 interface TodoControllerProps {
@@ -112,8 +122,13 @@ function TodoController({ children }: TodoControllerProps) {
     }
   }, [todos, filter]);
 
+  const handleReset = useCallback(() => {
+    setTodos([]);
+    setSubjects([]);
+  }, []);
+
   const handleChangeTodoSubject = useCallback(
-    (key: "UP" | "DOWN", todoId: ITodo["id"]) => {
+    (key: "UP" | "DOWN", todoId: ITodo["id"], subjects: ISubject[]) => {
       const subjectId = todos.find((todo) => todo.id === todoId)?.subjectId;
       const index = subjects.findIndex((subject) => subject.id === subjectId);
       if (!subjectId) return;
@@ -142,7 +157,7 @@ function TodoController({ children }: TodoControllerProps) {
           break;
       }
     },
-    [todos, subjects],
+    [todos],
   );
 
   const handleSelectFilter = useCallback((key: ITodoFilter) => {
@@ -154,6 +169,10 @@ function TodoController({ children }: TodoControllerProps) {
       ...prev,
       { id: Date.now(), title: "새로운 계획", done: false, subjectId },
     ]);
+  }, []);
+
+  const handleRemoveTodo = useCallback((todoId: ITodo["id"]) => {
+    setTodos((prev) => prev.filter((t) => t.id !== todoId));
   }, []);
 
   const handleChangeTodoTitle = useCallback(
@@ -200,12 +219,14 @@ function TodoController({ children }: TodoControllerProps) {
       subjects,
       onAddSubject: handleAddSubject,
       onAddTodo: handleAddTodo,
+      onRemoveTodo: handleRemoveTodo,
       onSelectFilter: handleSelectFilter,
       onChangeTodoTitle: handleChangeTodoTitle,
       onChangeSubjectTitle: handleChangeSubjectTitle,
       onToggleTodoDone: handleToggleTodoDone,
       onChangeTodoSubject: handleChangeTodoSubject,
       onRemoveSubjectAndTodos: handleRemoveSubjectAndTodos,
+      onReset: handleReset,
     }),
     [
       filteredTodos,
@@ -218,6 +239,8 @@ function TodoController({ children }: TodoControllerProps) {
       handleToggleTodoDone,
       handleChangeTodoSubject,
       handleRemoveSubjectAndTodos,
+      handleReset,
+      handleRemoveTodo,
     ],
   );
 
@@ -231,17 +254,19 @@ function TodoController({ children }: TodoControllerProps) {
 
   if (!children || typeof children !== "function") return null;
 
-  return children(childrenProps);
+  return children({ ...childrenProps });
 }
 
 interface TodoHeaderProps {
   onAddSubject: () => void;
   onSelectFilter: (key: ITodoFilter) => void;
+  onReset: () => void;
 }
 
 const TodoHeader = memo(function TodoHeader({
   onAddSubject,
   onSelectFilter,
+  onReset,
 }: TodoHeaderProps) {
   return (
     <div>
@@ -263,6 +288,7 @@ const TodoHeader = memo(function TodoHeader({
           </option>
         ))}
       </select>
+      <button onClick={onReset}>초기화</button>
     </div>
   );
 });
@@ -283,6 +309,7 @@ const SubjectHeader = memo(function SubjectHeader({
   onChangeSubjectTitle,
   onRemoveSubjectAndTodos,
 }: SubjectHeaderProps) {
+  console.log("rendered" + subject.title);
   return (
     <div>
       <input
@@ -305,7 +332,12 @@ interface TodoItemProps {
     todoId: ITodo["id"],
   ) => void;
   onToggleTodoDone: (todoId: ITodo["id"]) => void;
-  onChangeTodoSubject: (key: "UP" | "DOWN", todoId: ITodo["id"]) => void;
+  onChangeTodoSubject: (
+    key: "UP" | "DOWN",
+    todoId: ITodo["id"],
+    subjects: ISubject[],
+  ) => void;
+  onRemoveTodo: (todoId: ITodo["id"]) => void;
 }
 
 const TodoItem = memo(function TodoItem({
@@ -314,7 +346,9 @@ const TodoItem = memo(function TodoItem({
   onChangeTodoTitle,
   onToggleTodoDone,
   onChangeTodoSubject,
+  onRemoveTodo,
 }: TodoItemProps) {
+  console.log("rendered" + todo.title);
   return (
     <div>
       <input
@@ -326,13 +360,16 @@ const TodoItem = memo(function TodoItem({
         {todo.done ? "undone" : "done"}
       </button>
       {todo.subjectId !== subjects[0].id && (
-        <button onClick={() => onChangeTodoSubject("UP", todo.id)}>위로</button>
+        <button onClick={() => onChangeTodoSubject("UP", todo.id, subjects)}>
+          위로
+        </button>
       )}
       {todo.subjectId !== subjects[subjects.length - 1].id && (
-        <button onClick={() => onChangeTodoSubject("DOWN", todo.id)}>
+        <button onClick={() => onChangeTodoSubject("DOWN", todo.id, subjects)}>
           아래로
         </button>
       )}
+      <button onClick={() => onRemoveTodo(todo.id)}>제거</button>
     </div>
   );
 });
