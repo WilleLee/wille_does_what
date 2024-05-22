@@ -23,6 +23,6 @@ function init() {
 describe("StartPage", () => {
   test("should do initial render", () => {
     init();
-    expect(screen.getAllByText(/start/gi)[0]).toBeDefined();
+    expect(screen.getAllByText(/wille does what\?/gi)[0]).toBeDefined();
   });
 });
