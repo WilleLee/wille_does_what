@@ -55,6 +55,10 @@ function Layout({ children }: LayoutProps) {
     >
       <div
         css={css`
+          width: 100%;
+          max-width: 380px;
+          margin: 0 auto;
+          padding: 16px 0;
           background: ${colors.background};
         `}
       >

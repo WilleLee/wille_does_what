@@ -9,6 +9,11 @@ import {
 } from "react";
 import { ISubject, ITodo } from "@models/todo";
 import cookies from "@libs/cookies";
+import Button from "@components/Button";
+import { css } from "@emotion/react";
+import Select from "@components/Select";
+import colors from "@constants/colors";
+import { GlobalPortal } from "@/GlobalPortal";
 
 type ITodoFilter = "ALL" | "DONE" | "UNDONE";
 
@@ -24,6 +29,7 @@ export default function StartPage() {
       {({
         todos,
         subjects,
+        showResetModal,
         onAddSubject,
         onAddTodo,
         onRemoveTodo,
@@ -33,13 +39,16 @@ export default function StartPage() {
         onToggleTodoDone,
         onChangeTodoSubject,
         onRemoveSubjectAndTodos,
-        onReset,
+        onOpenReset,
+        onCloseReset,
+        onConfirmReset,
       }) => (
         <>
           <TodoHeader
+            isEmpty={subjects.length === 0}
             onAddSubject={onAddSubject}
             onSelectFilter={onSelectFilter}
-            onReset={onReset}
+            onOpenReset={onOpenReset}
           />
           {subjects.map((subject) => (
             <SubjectContainer key={subject.id}>
@@ -64,6 +73,11 @@ export default function StartPage() {
                 ))}
             </SubjectContainer>
           ))}
+          {showResetModal && (
+            <Modal onClose={onCloseReset} onConfirm={onConfirmReset}>
+              할 일 목록을 초기화하시겠습니까?
+            </Modal>
+          )}
         </>
       )}
     </TodoController>
@@ -73,6 +87,7 @@ export default function StartPage() {
 interface TodoControllerChildrenProps {
   todos: ITodo[];
   subjects: ISubject[];
+  showResetModal: boolean;
   onAddTodo: (subjectId: ISubject["id"]) => void;
   onRemoveTodo: (todoId: ITodo["id"]) => void;
   onAddSubject: () => void;
@@ -93,7 +108,9 @@ interface TodoControllerChildrenProps {
     subjects: ISubject[],
   ) => void;
   onRemoveSubjectAndTodos: (subjectId: ISubject["id"]) => void;
-  onReset: () => void;
+  onOpenReset: () => void;
+  onCloseReset: () => void;
+  onConfirmReset: () => void;
 }
 
 interface TodoControllerProps {
@@ -104,9 +121,24 @@ const initialTodos: ITodo[] = cookies.get("todos") || [];
 const initialSubjects: ISubject[] = cookies.get("subjects") || [];
 
 function TodoController({ children }: TodoControllerProps) {
+  const [showResetModal, setShowResetModal] = useState(false);
+  console.log(showResetModal);
   const [filter, setFilter] = useState<ITodoFilter>("ALL");
   const [todos, setTodos] = useState<ITodo[]>(initialTodos);
   const [subjects, setSubjects] = useState<ISubject[]>(initialSubjects);
+
+  const handleConfirmReset = useCallback(() => {
+    setTodos([]);
+    setSubjects([]);
+    setShowResetModal(false);
+  }, []);
+  const handleCloseReset = useCallback(() => {
+    setShowResetModal(false);
+  }, []);
+  const handleOpenReset = useCallback(() => {
+    console.log("open!");
+    setShowResetModal(true);
+  }, []);
 
   const filteredTodos = useMemo(() => {
     switch (filter) {
@@ -121,11 +153,6 @@ function TodoController({ children }: TodoControllerProps) {
       }
     }
   }, [todos, filter]);
-
-  const handleReset = useCallback(() => {
-    setTodos([]);
-    setSubjects([]);
-  }, []);
 
   const handleChangeTodoSubject = useCallback(
     (
@@ -222,6 +249,7 @@ function TodoController({ children }: TodoControllerProps) {
     () => ({
       todos: filteredTodos,
       subjects,
+      showResetModal,
       onAddTodo: handleAddTodo,
       onRemoveTodo: handleRemoveTodo,
       onAddSubject: handleAddSubject,
@@ -231,11 +259,14 @@ function TodoController({ children }: TodoControllerProps) {
       onToggleTodoDone: handleToggleTodoDone,
       onChangeTodoSubject: handleChangeTodoSubject,
       onRemoveSubjectAndTodos: handleRemoveSubjectAndTodos,
-      onReset: handleReset,
+      onOpenReset: handleOpenReset,
+      onCloseReset: handleCloseReset,
+      onConfirmReset: handleConfirmReset,
     }),
     [
       filteredTodos,
       subjects,
+      showResetModal,
       handleAddSubject,
       handleAddTodo,
       handleSelectFilter,
@@ -244,8 +275,10 @@ function TodoController({ children }: TodoControllerProps) {
       handleToggleTodoDone,
       handleChangeTodoSubject,
       handleRemoveSubjectAndTodos,
-      handleReset,
       handleRemoveTodo,
+      handleOpenReset,
+      handleCloseReset,
+      handleConfirmReset,
     ],
   );
 
@@ -263,38 +296,63 @@ function TodoController({ children }: TodoControllerProps) {
 }
 
 interface TodoHeaderProps {
+  isEmpty: boolean;
   onAddSubject: () => void;
   onSelectFilter: (key: ITodoFilter) => void;
-  onReset: () => void;
+  onOpenReset: () => void;
 }
 
 const TodoHeader = memo(function TodoHeader({
+  isEmpty,
   onAddSubject,
   onSelectFilter,
-  onReset,
+  onOpenReset,
 }: TodoHeaderProps) {
   return (
-    <div>
-      <h1>Wille does WHAT?</h1>
-      <button onClick={onAddSubject}>그룹 추가</button>
-      <select
-        data-testid="todo_filter_select"
-        onChange={(e) => {
-          const value = e.target.value as ITodoFilter;
-          onSelectFilter(value);
-        }}
+    <div
+      css={css`
+        margin-bottom: 16px;
+      `}
+    >
+      <h1
+        css={css`
+          margin-bottom: 8px;
+          font-size: 24px;
+          font-weight: 800;
+          color: ${colors.grey600};
+        `}
       >
-        {todoFilterOptions.map((option) => (
-          <option
-            key={option.key}
-            value={option.key}
-            data-testid="todo_filter_option"
-          >
-            {option.label}
-          </option>
-        ))}
-      </select>
-      <button onClick={onReset}>초기화</button>
+        Wille does WHAT?
+      </h1>
+      <div
+        css={css`
+          display: grid;
+          grid-template-columns: 84px 1fr 70px;
+          column-gap: 4px;
+        `}
+      >
+        <Button onClick={onAddSubject}>그룹 추가</Button>
+        <Select
+          data-testid="todo_filter_select"
+          onChange={(e) => {
+            const value = e.target.value as ITodoFilter;
+            onSelectFilter(value);
+          }}
+        >
+          {todoFilterOptions.map((option) => (
+            <option
+              key={option.key}
+              value={option.key}
+              data-testid="todo_filter_option"
+            >
+              {option.label}
+            </option>
+          ))}
+        </Select>
+        <Button disabled={isEmpty} danger onClick={onOpenReset}>
+          초기화
+        </Button>
+      </div>
     </div>
   );
 });
@@ -396,3 +454,51 @@ const SubjectContainer = memo(function SubjectContainer({
 }) {
   return <div data-testid="subject_container">{children}</div>;
 });
+
+function Modal({
+  onConfirm,
+  onClose,
+  children,
+}: {
+  onConfirm: () => void;
+  onClose: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <GlobalPortal.Element>
+      <div
+        css={css`
+          width: 100%;
+          height: 100%;
+          position: fixed;
+          top: 0;
+          left: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(0, 0, 0, 0.5);
+        `}
+      >
+        <div
+          css={css`
+            width: 280px;
+            background-color: ${colors.white};
+          `}
+        >
+          <div>
+            <button onClick={onClose}>x</button>
+          </div>
+          <div>{children}</div>
+          <div>
+            <button data-testid="modal_confirm" onClick={onConfirm}>
+              확인
+            </button>
+            <button data-testid="modal_cancel" onClick={onClose}>
+              취소
+            </button>
+          </div>
+        </div>
+      </div>
+    </GlobalPortal.Element>
+  );
+}

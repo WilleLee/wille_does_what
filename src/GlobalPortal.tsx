@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useContext, useRef } from "react";
+import { ReactNode, createContext, useContext, useState } from "react";
 import { createPortal } from "react-dom";
 
 const PortalContext = createContext<HTMLDivElement | null>(null);
@@ -8,11 +8,17 @@ interface PortalProviderProps {
 }
 
 function PortalProvider({ children }: PortalProviderProps) {
-  const portalRef = useRef<HTMLDivElement>(null);
+  const [portalRef, setPortalRef] = useState<HTMLDivElement | null>(null);
   return (
-    <PortalContext.Provider value={portalRef.current}>
+    <PortalContext.Provider value={portalRef}>
       {children}
-      <div ref={portalRef} />
+      <div
+        id="portal-container"
+        ref={(elem) => {
+          if (!elem || portalRef) return;
+          setPortalRef(elem);
+        }}
+      />
     </PortalContext.Provider>
   );
 }

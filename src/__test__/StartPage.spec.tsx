@@ -1,19 +1,8 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { logDOM, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import StartPage from "@pages/index";
-import { MemoryRouter } from "react-router-dom";
-import { ReactNode } from "react";
 import userEvent from "@testing-library/user-event";
-
-type Path = `/${string}`;
-
-function wrapper(props: { children: ReactNode }, entry?: Path) {
-  return (
-    <MemoryRouter initialEntries={[entry || "/"]}>
-      {props.children}
-    </MemoryRouter>
-  );
-}
+import { wrapper } from "./libs/renderUI";
 
 function init() {
   const { unmount } = render(<StartPage />, {
@@ -33,6 +22,7 @@ function init() {
 8. 할 일 값 변경 o
 9. 그룹 값 변경 o
 10. 할 일의 그룹 위아래 변경 o
+11. 초기화 버튼 클릭 o
 */
 
 describe("StartPage", () => {
@@ -301,7 +291,6 @@ describe("StartPage", () => {
       await userEvent.click(addTodo);
     });
     await waitFor(async () => {
-      logDOM();
       const group1 = screen.getAllByTestId("subject_container")[0];
       const todo = screen.getAllByTestId("input_todo_title")[0];
       expect(group1).toContain(todo);
@@ -326,6 +315,51 @@ describe("StartPage", () => {
       expect(group1).toContain(todo);
       expect(group2).not.toContain(todo);
     });
+    unmount();
+  });
+
+  test("should reset all values when clicking the button", async () => {
+    const { unmount } = init();
+    const resetButton = screen.getAllByRole("button", {
+      name: "초기화",
+    })[0] as HTMLButtonElement;
+    expect(resetButton.disabled).toEqual(true);
+
+    const addGroup = screen.getAllByRole("button", {
+      name: "그룹 추가",
+    })[0];
+    await userEvent.click(addGroup);
+    await userEvent.click(addGroup);
+    await waitFor(async () => {
+      const subjectTitles = screen.getAllByTestId("input_subject_title");
+      expect(subjectTitles).toHaveLength(2);
+      const addTodo = screen.getAllByRole("button", {
+        name: "할 일 추가",
+      })[0];
+      await userEvent.click(addTodo);
+      await userEvent.click(addTodo);
+      await userEvent.click(addTodo);
+    });
+    await waitFor(async () => {
+      const todoTitles = screen.getAllByTestId("input_todo_title");
+      expect(todoTitles).toHaveLength(3);
+      expect(resetButton.disabled).toEqual(false);
+      await userEvent.click(resetButton);
+    });
+    await waitFor(async () => {
+      const modalText =
+        screen.getAllByText("할 일 목록을 초기화하시겠습니까?")[0];
+      expect(modalText).toBeDefined();
+      const confirmButton = screen.getAllByTestId("modal_confirm")[0];
+      userEvent.click(confirmButton);
+    });
+    await waitFor(async () => {
+      const subjectTitles = screen.queryAllByTestId("input_subject_title");
+      expect(subjectTitles).toHaveLength(0);
+      const todoTitles = screen.queryAllByTestId("input_todo_title");
+      expect(todoTitles).toHaveLength(0);
+    });
+
     unmount();
   });
 });
