@@ -12,8 +12,8 @@ import Button from "@components/Button";
 import { css } from "@emotion/react";
 import Select from "@components/Select";
 import colors from "@constants/colors";
-import { GlobalPortal } from "@/GlobalPortal";
 import locals from "@libs/locals";
+import Modal from "@components/Modal";
 
 type ITodoFilter = "ALL" | "DONE" | "UNDONE";
 
@@ -24,7 +24,6 @@ const todoFilterOptions: { key: ITodoFilter; label: string }[] = [
 ];
 
 export default function StartPage() {
-  console.log("rendered");
   return (
     <TodoController>
       {({
@@ -451,53 +450,14 @@ const SubjectContainer = memo(function SubjectContainer({
 }: {
   children: ReactNode;
 }) {
-  return <div data-testid="subject_container">{children}</div>;
-});
-
-function Modal({
-  onConfirm,
-  onClose,
-  children,
-}: {
-  onConfirm: () => void;
-  onClose: () => void;
-  children: ReactNode;
-}) {
   return (
-    <GlobalPortal.Element>
-      <div
-        css={css`
-          width: 100%;
-          height: 100%;
-          position: fixed;
-          top: 0;
-          left: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(0, 0, 0, 0.5);
-        `}
-      >
-        <div
-          css={css`
-            width: 280px;
-            background-color: ${colors.white};
-          `}
-        >
-          <div>
-            <button onClick={onClose}>x</button>
-          </div>
-          <div>{children}</div>
-          <div>
-            <button data-testid="modal_confirm" onClick={onConfirm}>
-              확인
-            </button>
-            <button data-testid="modal_cancel" onClick={onClose}>
-              취소
-            </button>
-          </div>
-        </div>
-      </div>
-    </GlobalPortal.Element>
+    <div
+      css={css`
+        margin-bottom: 16px;
+      `}
+      data-testid="subject_container"
+    >
+      {children}
+    </div>
   );
-}
+});
