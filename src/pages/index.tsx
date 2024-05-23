@@ -1,6 +1,5 @@
 import {
   ChangeEvent,
-  Fragment,
   ReactNode,
   memo,
   useCallback,
@@ -9,7 +8,7 @@ import {
   useState,
 } from "react";
 import { ISubject, ITodo } from "@models/todo";
-import cookies from "@/libs/cookies";
+import cookies from "@libs/cookies";
 
 type ITodoFilter = "ALL" | "DONE" | "UNDONE";
 
@@ -43,7 +42,7 @@ export default function StartPage() {
             onReset={onReset}
           />
           {subjects.map((subject) => (
-            <Fragment key={subject.id}>
+            <SubjectContainer key={subject.id}>
               <SubjectHeader
                 subject={subject}
                 onAddTodo={onAddTodo}
@@ -63,7 +62,7 @@ export default function StartPage() {
                     onRemoveTodo={onRemoveTodo}
                   />
                 ))}
-            </Fragment>
+            </SubjectContainer>
           ))}
         </>
       )}
@@ -128,7 +127,6 @@ function TodoController({ children }: TodoControllerProps) {
     setSubjects([]);
   }, []);
 
-  // 렌더링 최적화 위해 리팩터링 필요
   const handleChangeTodoSubject = useCallback(
     (
       key: "UP" | "DOWN",
@@ -280,6 +278,7 @@ const TodoHeader = memo(function TodoHeader({
       <h1>Wille does WHAT?</h1>
       <button onClick={onAddSubject}>그룹 추가</button>
       <select
+        data-testid="todo_filter_select"
         onChange={(e) => {
           const value = e.target.value as ITodoFilter;
           onSelectFilter(value);
@@ -289,7 +288,7 @@ const TodoHeader = memo(function TodoHeader({
           <option
             key={option.key}
             value={option.key}
-            aira-label="todo_filter_option"
+            data-testid="todo_filter_option"
           >
             {option.label}
           </option>
@@ -316,10 +315,10 @@ const SubjectHeader = memo(function SubjectHeader({
   onChangeSubjectTitle,
   onRemoveSubjectAndTodos,
 }: SubjectHeaderProps) {
-  console.log("rendered" + subject.title);
   return (
     <div>
       <input
+        data-testid="input_subject_title"
         value={subject.title}
         onChange={(e) => onChangeSubjectTitle(e, subject.id)}
       />
@@ -356,16 +355,16 @@ const TodoItem = memo(function TodoItem({
   onChangeTodoSubject,
   onRemoveTodo,
 }: TodoItemProps) {
-  console.log("rendered" + todo.title);
   return (
     <div>
       <input
+        data-testid="input_todo_title"
         value={todo.title}
         onChange={(e) => onChangeTodoTitle(e, todo.id)}
         disabled={todo.done}
       />
       <button onClick={() => onToggleTodoDone(todo.id)}>
-        {todo.done ? "undone" : "done"}
+        {todo.done ? "완료 취소" : "완료"}
       </button>
       {todo.subjectId !== subjects[0].id && (
         <button
@@ -388,4 +387,12 @@ const TodoItem = memo(function TodoItem({
       <button onClick={() => onRemoveTodo(todo.id)}>제거</button>
     </div>
   );
+});
+
+const SubjectContainer = memo(function SubjectContainer({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return <div data-testid="subject_container">{children}</div>;
 });
