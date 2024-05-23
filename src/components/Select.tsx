@@ -44,12 +44,17 @@ const Select = forwardRef(function Select(
           user-select: none;
           transition: background 0.1s ease-in-out;
           color: ${colors.black};
+          cursor: pointer;
 
           &:focus {
             outline: none;
           }
           &:active {
             background: ${colors.green200};
+          }
+          &:disabled {
+            opacity: 0.26;
+            cursor: not-allowed;
           }
         `}
         ref={ref}

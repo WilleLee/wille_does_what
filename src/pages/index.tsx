@@ -8,7 +8,6 @@ import {
   useState,
 } from "react";
 import { ISubject, ITodo } from "@models/todo";
-// import cookies from "@libs/cookies";
 import Button from "@components/Button";
 import { css } from "@emotion/react";
 import Select from "@components/Select";
@@ -25,6 +24,7 @@ const todoFilterOptions: { key: ITodoFilter; label: string }[] = [
 ];
 
 export default function StartPage() {
+  console.log("rendered");
   return (
     <TodoController>
       {({
@@ -118,14 +118,11 @@ interface TodoControllerProps {
   children: (args: TodoControllerChildrenProps) => ReactNode;
 }
 
-// const initialTodos: ITodo[] = cookies.get("todos") || [];
 const initialTodos: ITodo[] = locals.get("wille_todos") || [];
-// const initialSubjects: ISubject[] = cookies.get("subjects") || [];
 const initialSubjects: ISubject[] = locals.get("wille_subjects") || [];
 
 function TodoController({ children }: TodoControllerProps) {
   const [showResetModal, setShowResetModal] = useState(false);
-  console.log(showResetModal);
   const [filter, setFilter] = useState<ITodoFilter>("ALL");
   const [todos, setTodos] = useState<ITodo[]>(initialTodos);
   const [subjects, setSubjects] = useState<ISubject[]>(initialSubjects);
@@ -139,7 +136,6 @@ function TodoController({ children }: TodoControllerProps) {
     setShowResetModal(false);
   }, []);
   const handleOpenReset = useCallback(() => {
-    console.log("open!");
     setShowResetModal(true);
   }, []);
 
@@ -286,12 +282,10 @@ function TodoController({ children }: TodoControllerProps) {
   );
 
   useEffect(() => {
-    // cookies.set("todos", JSON.stringify(todos), 365);
     locals.set("wille_todos", todos);
   }, [todos]);
 
   useEffect(() => {
-    // cookies.set("subjects", JSON.stringify(subjects), 365);
     locals.set("wille_subjects", subjects);
   }, [subjects]);
 
