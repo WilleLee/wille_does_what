@@ -8,12 +8,13 @@ import {
   useState,
 } from "react";
 import { ISubject, ITodo } from "@models/todo";
-import cookies from "@libs/cookies";
+// import cookies from "@libs/cookies";
 import Button from "@components/Button";
 import { css } from "@emotion/react";
 import Select from "@components/Select";
 import colors from "@constants/colors";
 import { GlobalPortal } from "@/GlobalPortal";
+import locals from "@libs/locals";
 
 type ITodoFilter = "ALL" | "DONE" | "UNDONE";
 
@@ -117,8 +118,10 @@ interface TodoControllerProps {
   children: (args: TodoControllerChildrenProps) => ReactNode;
 }
 
-const initialTodos: ITodo[] = cookies.get("todos") || [];
-const initialSubjects: ISubject[] = cookies.get("subjects") || [];
+// const initialTodos: ITodo[] = cookies.get("todos") || [];
+const initialTodos: ITodo[] = locals.get("wille_todos") || [];
+// const initialSubjects: ISubject[] = cookies.get("subjects") || [];
+const initialSubjects: ISubject[] = locals.get("wille_subjects") || [];
 
 function TodoController({ children }: TodoControllerProps) {
   const [showResetModal, setShowResetModal] = useState(false);
@@ -283,11 +286,13 @@ function TodoController({ children }: TodoControllerProps) {
   );
 
   useEffect(() => {
-    cookies.set("todos", JSON.stringify(todos), 365);
+    // cookies.set("todos", JSON.stringify(todos), 365);
+    locals.set("wille_todos", todos);
   }, [todos]);
 
   useEffect(() => {
-    cookies.set("subjects", JSON.stringify(subjects), 365);
+    // cookies.set("subjects", JSON.stringify(subjects), 365);
+    locals.set("wille_subjects", subjects);
   }, [subjects]);
 
   if (!children || typeof children !== "function") return null;
