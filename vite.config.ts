@@ -17,4 +17,5 @@ export default defineConfig({
   test: {
     environment: "jsdom",
   },
+  logLevel: process.env.NODE_ENV === "production" ? "silent" : "info",
 });
