@@ -3,7 +3,22 @@
   "name": "Wille does WHAT?",
   "short_url": ".",
   "start_url": ".",
+  "homepage_url": "https://wille-does-what.vercel.app/",
   "display": "standalone",
   "theme_color": "#1f1f1f",
-  "background_color": "#ffffff"
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "logos/does_logo_96.png",
+      "sizes": "96x96"
+    },
+    {
+      "src": "logos/does_logo_144.png",
+      "sizes": "144x144"
+    },
+    {
+      "src": "logos/does_logo_192.png",
+      "sizes": "192x192"
+    }
+  ]
 }
