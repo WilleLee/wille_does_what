@@ -74,9 +74,9 @@ export default function StartPage() {
 interface TodoControllerChildrenProps {
   todos: ITodo[];
   subjects: ISubject[];
-  onAddSubject: () => void;
   onAddTodo: (subjectId: ISubject["id"]) => void;
   onRemoveTodo: (todoId: ITodo["id"]) => void;
+  onAddSubject: () => void;
   onSelectFilter: (key: ITodoFilter) => void;
   onChangeTodoTitle: (
     e: ChangeEvent<HTMLInputElement>,
@@ -90,6 +90,7 @@ interface TodoControllerChildrenProps {
   onChangeTodoSubject: (
     key: "UP" | "DOWN",
     todoId: ITodo["id"],
+    currentSubjectId: ISubject["id"],
     subjects: ISubject[],
   ) => void;
   onRemoveSubjectAndTodos: (subjectId: ISubject["id"]) => void;
@@ -129,28 +130,33 @@ function TodoController({ children }: TodoControllerProps) {
 
   // 렌더링 최적화 위해 리팩터링 필요
   const handleChangeTodoSubject = useCallback(
-    (key: "UP" | "DOWN", todoId: ITodo["id"], subjects: ISubject[]) => {
-      const subjectId = todos.find((todo) => todo.id === todoId)?.subjectId;
-      const index = subjects.findIndex((subject) => subject.id === subjectId);
-      if (!subjectId) return;
+    (
+      key: "UP" | "DOWN",
+      todoId: ITodo["id"],
+      currentSubjectId: ISubject["id"],
+      subjects: ISubject[],
+    ) => {
+      const subjectIndex = subjects.findIndex((s) => s.id === currentSubjectId);
       switch (key) {
         case "UP": {
-          if (index === 0) break;
-          const prevSubjectId = subjects[index - 1].id;
+          if (subjectIndex === 0) break;
+          const targetSubjectId = subjects[subjectIndex - 1].id;
           setTodos((prev) =>
-            prev.map((todo) =>
-              todo.id === todoId ? { ...todo, subjectId: prevSubjectId } : todo,
-            ),
+            prev.map((t) => {
+              if (t.id === todoId) return { ...t, subjectId: targetSubjectId };
+              return t;
+            }),
           );
           break;
         }
         case "DOWN": {
-          if (index === subjects.length - 1) break;
-          const nextSubjectId = subjects[index + 1].id;
+          if (subjectIndex === subjects.length - 1) break;
+          const targetSubjectId = subjects[subjectIndex + 1].id;
           setTodos((prev) =>
-            prev.map((todo) =>
-              todo.id === todoId ? { ...todo, subjectId: nextSubjectId } : todo,
-            ),
+            prev.map((t) => {
+              if (t.id === todoId) return { ...t, subjectId: targetSubjectId };
+              return t;
+            }),
           );
           break;
         }
@@ -158,7 +164,7 @@ function TodoController({ children }: TodoControllerProps) {
           break;
       }
     },
-    [todos],
+    [],
   );
 
   const handleSelectFilter = useCallback((key: ITodoFilter) => {
@@ -218,9 +224,9 @@ function TodoController({ children }: TodoControllerProps) {
     () => ({
       todos: filteredTodos,
       subjects,
-      onAddSubject: handleAddSubject,
       onAddTodo: handleAddTodo,
       onRemoveTodo: handleRemoveTodo,
+      onAddSubject: handleAddSubject,
       onSelectFilter: handleSelectFilter,
       onChangeTodoTitle: handleChangeTodoTitle,
       onChangeSubjectTitle: handleChangeSubjectTitle,
@@ -336,6 +342,7 @@ interface TodoItemProps {
   onChangeTodoSubject: (
     key: "UP" | "DOWN",
     todoId: ITodo["id"],
+    currentSubjectId: ISubject["id"],
     subjects: ISubject[],
   ) => void;
   onRemoveTodo: (todoId: ITodo["id"]) => void;
@@ -361,12 +368,20 @@ const TodoItem = memo(function TodoItem({
         {todo.done ? "undone" : "done"}
       </button>
       {todo.subjectId !== subjects[0].id && (
-        <button onClick={() => onChangeTodoSubject("UP", todo.id, subjects)}>
+        <button
+          onClick={() =>
+            onChangeTodoSubject("UP", todo.id, todo.subjectId, subjects)
+          }
+        >
           위로
         </button>
       )}
       {todo.subjectId !== subjects[subjects.length - 1].id && (
-        <button onClick={() => onChangeTodoSubject("DOWN", todo.id, subjects)}>
+        <button
+          onClick={() =>
+            onChangeTodoSubject("DOWN", todo.id, todo.subjectId, subjects)
+          }
+        >
           아래로
         </button>
       )}
