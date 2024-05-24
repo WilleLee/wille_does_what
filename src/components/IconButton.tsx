@@ -5,50 +5,61 @@ import {
   ForwardedRef,
   ReactNode,
   forwardRef,
+  useMemo,
 } from "react";
+
+type ButtonType = "default" | "danger" | "complete" | "transparent";
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
+  buttonType?: ButtonType;
   fullWidth?: boolean;
   fullHeight?: boolean;
-  danger?: boolean;
-  faded?: boolean;
 }
 
-const Button = forwardRef(function Button(
+const IconButton = forwardRef(function Button(
   props: Props,
   ref: ForwardedRef<HTMLButtonElement>,
 ) {
   const {
     children,
-    danger = false,
-    faded = false,
+    buttonType = "default",
     fullWidth = true,
-    fullHeight = false,
+    fullHeight = true,
     ...rest
   } = props;
+  const [back, activeBack] = useMemo(() => {
+    switch (buttonType) {
+      case "default":
+        return [colors.grey400, colors.grey500];
+      case "danger":
+        return [colors.red200, colors.red300];
+      case "complete":
+        return [colors.green200, colors.green300];
+      case "transparent":
+        return [colors.white, colors.grey50];
+      default:
+        return [colors.grey200, colors.grey300];
+    }
+  }, [buttonType]);
   return (
     <button
       css={css`
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: ${fullWidth ? "100%" : "auto"};
+        width: ${fullWidth ? "100%" : "24px"};
         padding: 0 8px;
         border: 0 solid transparent;
-        height: ${fullHeight ? "100%" : "36px"};
-        border-radius: 10px;
+        height: ${fullHeight ? "100%" : "24px"};
+        border-radius: 50%;
         -webkit-font-smoothing: antialiased;
-        background: ${danger
-          ? colors.red500
-          : faded
-          ? colors.grey400
-          : colors.grey500};
-        color: ${colors.white};
-        font-size: 13px;
+        background: ${back};
+        color: ${buttonType === "transparent" ? colors.grey700 : colors.white};
+        /* font-size: 15px;
         font-weight: 600;
         white-space: nowrap;
-        user-select: none;
+        user-select: none; */
         transition: background 0.1s ease-in-out;
         cursor: pointer;
 
@@ -60,11 +71,7 @@ const Button = forwardRef(function Button(
           cursor: not-allowed;
         }
         &:active {
-          background: ${danger
-            ? colors.red700
-            : faded
-            ? colors.grey500
-            : colors.grey700};
+          background: ${activeBack};
         }
       `}
       ref={ref}
@@ -75,4 +82,4 @@ const Button = forwardRef(function Button(
   );
 });
 
-export default Button;
+export default IconButton;

@@ -15,6 +15,12 @@ import colors from "@constants/colors";
 import locals from "@libs/locals";
 import Modal from "@components/Modal";
 import Input from "@components/Input";
+import CheckSvg from "@components/svgs/CheckSvg";
+import DashSvg from "@components/svgs/DashSvg";
+import IconButton from "@components/IconButton";
+import UpSvg from "@components/svgs/UpSvg";
+import DownSvg from "@components/svgs/DownSvg";
+import XSvg from "@components/svgs/XSvg";
 
 type ITodoFilter = "ALL" | "DONE" | "UNDONE";
 
@@ -454,35 +460,55 @@ const TodoItem = memo(function TodoItem({
   onRemoveTodo,
 }: TodoItemProps) {
   return (
-    <div>
+    <div
+      css={css`
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      `}
+    >
       <Input
         data-testid="input_todo_title"
         value={todo.title}
         onChange={(e) => onChangeTodoTitle(e, todo.id)}
         disabled={todo.done}
       />
-      <button onClick={() => onToggleTodoDone(todo.id)}>
-        {todo.done ? "완료 취소" : "완료"}
-      </button>
-      {todo.subjectId !== subjects[0].id && (
-        <button
-          onClick={() =>
-            onChangeTodoSubject("UP", todo.id, todo.subjectId, subjects)
-          }
+      <div
+        css={css`
+          display: grid;
+          grid-template-columns: repeat(4, 26px);
+          grid-template-rows: 26px;
+          column-gap: 4px;
+        `}
+      >
+        <IconButton
+          buttonType={todo.done ? "danger" : "complete"}
+          onClick={() => onToggleTodoDone(todo.id)}
         >
-          위로
-        </button>
-      )}
-      {todo.subjectId !== subjects[subjects.length - 1].id && (
-        <button
-          onClick={() =>
-            onChangeTodoSubject("DOWN", todo.id, todo.subjectId, subjects)
-          }
-        >
-          아래로
-        </button>
-      )}
-      <button onClick={() => onRemoveTodo(todo.id)}>제거</button>
+          {todo.done ? <DashSvg /> : <CheckSvg />}
+        </IconButton>
+        {todo.subjectId !== subjects[0].id && (
+          <IconButton
+            onClick={() =>
+              onChangeTodoSubject("UP", todo.id, todo.subjectId, subjects)
+            }
+          >
+            <UpSvg />
+          </IconButton>
+        )}
+        {todo.subjectId !== subjects[subjects.length - 1].id && (
+          <IconButton
+            onClick={() =>
+              onChangeTodoSubject("DOWN", todo.id, todo.subjectId, subjects)
+            }
+          >
+            <DownSvg />
+          </IconButton>
+        )}
+        <IconButton onClick={() => onRemoveTodo(todo.id)}>
+          <XSvg />
+        </IconButton>
+      </div>
     </div>
   );
 });

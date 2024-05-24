@@ -2,6 +2,9 @@ import { GlobalPortal } from "@/GlobalPortal";
 import colors from "@constants/colors";
 import { css } from "@emotion/react";
 import { ReactNode } from "react";
+import Button from "@components/Button";
+import IconButton from "@components/IconButton";
+import XSvg from "@components/svgs/XSvg";
 
 export default function Modal({
   onConfirm,
@@ -40,7 +43,9 @@ export default function Modal({
             css={css`
               margin-bottom: 12px;
               display: grid;
-              grid-template-columns: 24px 1fr 24px;
+              grid-template-columns: 28px 1fr 28px;
+              grid-template-rows: 28px;
+              align-items: center;
             `}
           >
             <div />
@@ -53,10 +58,15 @@ export default function Modal({
             >
               알림
             </h3>
-            <button onClick={onClose}>x</button>
+            <IconButton buttonType="transparent" onClick={onClose}>
+              <XSvg />
+            </IconButton>
           </div>
           <div
             css={css`
+              max-height: 120px;
+              overflow-y: scroll;
+              overscroll-behavior: contain;
               margin-bottom: 16px;
               font-size: 14px;
               text-align: center;
@@ -71,12 +81,12 @@ export default function Modal({
               column-gap: 4px;
             `}
           >
-            <button data-testid="modal_confirm" onClick={onConfirm}>
+            <Button danger data-testid="modal_confirm" onClick={onConfirm}>
               확인
-            </button>
-            <button data-testid="modal_cancel" onClick={onClose}>
+            </Button>
+            <Button data-testid="modal_cancel" onClick={onClose}>
               취소
-            </button>
+            </Button>
           </div>
         </div>
       </div>
