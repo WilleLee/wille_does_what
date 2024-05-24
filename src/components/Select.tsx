@@ -37,7 +37,7 @@ const Select = forwardRef(function Select(
           border-radius: 10px;
           border: 0px solid transparent;
           -webkit-font-smoothing: antialiased;
-          background: ${colors.green100};
+          background: ${colors.grey100};
           font-size: 15px;
           font-weight: 600;
           white-space: nowrap;
@@ -50,7 +50,7 @@ const Select = forwardRef(function Select(
             outline: none;
           }
           &:active {
-            background: ${colors.green200};
+            background: ${colors.grey200};
           }
           &:disabled {
             opacity: 0.26;

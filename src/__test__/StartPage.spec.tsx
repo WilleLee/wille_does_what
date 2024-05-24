@@ -14,7 +14,7 @@ function init() {
 /*
 1. 초기 렌더 o
 2. 그룹 추가 버튼 클릭 o
-3. 그룹 제거 버튼 클릭 o
+3. 그룹 제거 버튼 클릭 o -> 수정 버전 (모달)
 4. 할 일 추가 버튼 클릭 o
 5. 할 일 제거 버튼 클릭 o
 6. 완료 / 완료 취소 버튼 클릭 o
@@ -65,21 +65,48 @@ describe("StartPage", () => {
 
   test("should remove a group when clicking the button", async () => {
     const { unmount } = init();
+
     const addGroup = screen.getAllByRole("button", {
       name: "그룹 추가",
     })[0];
-    expect(addGroup).toBeDefined();
     await userEvent.click(addGroup);
     await waitFor(async () => {
+      const addTodo = screen.getAllByRole("button", {
+        name: "할 일 추가",
+      })[0];
+      await userEvent.click(addTodo);
+    });
+    await waitFor(async () => {
+      const group = screen.getAllByTestId("input_subject_title")[0];
+      const todo = screen.getAllByTestId("input_todo_title")[0];
+      expect(group).toBeDefined();
+      expect(todo).toBeDefined();
+
       const removeGroups = screen.getAllByRole("button", {
         name: "그룹 제거",
       })[0];
       await userEvent.click(removeGroups);
     });
     await waitFor(async () => {
-      const group = screen.queryAllByTestId("input_subject_title")[0];
-      expect(group).not.toBeDefined();
+      const modalText = screen.getAllByText(
+        "해당 그룹과 할 일 목록을 모두 삭제하시겠습니까?",
+      );
+      expect(modalText).toBeDefined();
+      const confirmButton = screen.getAllByTestId("modal_confirm")[0];
+      await userEvent.click(confirmButton);
     });
+    await waitFor(async () => {
+      const groups = screen.queryAllByTestId("input_subject_title");
+      const todos = screen.queryAllByTestId("input_todo_title");
+      expect(groups).toHaveLength(0);
+      expect(todos).toHaveLength(0);
+    });
+
+    // await waitFor(async () => {
+    //   const group = screen.queryAllByTestId("input_subject_title")[0];
+    //   expect(group).not.toBeDefined();
+    // });
+
     unmount();
   });
 
