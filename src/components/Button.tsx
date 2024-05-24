@@ -30,7 +30,7 @@ const Button = forwardRef(function Button(
         height: 36px;
         border-radius: 10px;
         -webkit-font-smoothing: antialiased;
-        background: ${danger ? colors.red500 : colors.green500};
+        background: ${danger ? colors.red500 : colors.grey500};
         color: ${colors.white};
         font-size: 15px;
         font-weight: 600;
@@ -47,7 +47,7 @@ const Button = forwardRef(function Button(
           cursor: not-allowed;
         }
         &:active {
-          background: ${danger ? colors.red700 : colors.green700};
+          background: ${danger ? colors.red700 : colors.grey700};
         }
       `}
       ref={ref}

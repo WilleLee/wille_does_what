@@ -14,6 +14,7 @@ import Select from "@components/Select";
 import colors from "@constants/colors";
 import locals from "@libs/locals";
 import Modal from "@components/Modal";
+import Input from "@components/Input";
 
 type ITodoFilter = "ALL" | "DONE" | "UNDONE";
 
@@ -30,6 +31,7 @@ export default function StartPage() {
         todos,
         subjects,
         showResetModal,
+        subjectIdToRemove,
         onAddSubject,
         onAddTodo,
         onRemoveTodo,
@@ -42,6 +44,8 @@ export default function StartPage() {
         onOpenReset,
         onCloseReset,
         onConfirmReset,
+        onOpenRemoveSubject,
+        onCloseRemoveSubject,
       }) => (
         <>
           <TodoHeader
@@ -56,7 +60,7 @@ export default function StartPage() {
                 subject={subject}
                 onAddTodo={onAddTodo}
                 onChangeSubjectTitle={onChangeSubjectTitle}
-                onRemoveSubjectAndTodos={onRemoveSubjectAndTodos}
+                onOpenRemoveSubject={onOpenRemoveSubject}
               />
               {todos
                 .filter((todo) => todo.subjectId === subject.id)
@@ -78,6 +82,14 @@ export default function StartPage() {
               할 일 목록을 초기화하시겠습니까?
             </Modal>
           )}
+          {subjectIdToRemove && (
+            <Modal
+              onClose={onCloseRemoveSubject}
+              onConfirm={() => onRemoveSubjectAndTodos(subjectIdToRemove)}
+            >
+              해당 그룹과 할 일 목록을 모두 삭제하시겠습니까?
+            </Modal>
+          )}
         </>
       )}
     </TodoController>
@@ -88,6 +100,7 @@ interface TodoControllerChildrenProps {
   todos: ITodo[];
   subjects: ISubject[];
   showResetModal: boolean;
+  subjectIdToRemove: ISubject["id"] | null;
   onAddTodo: (subjectId: ISubject["id"]) => void;
   onRemoveTodo: (todoId: ITodo["id"]) => void;
   onAddSubject: () => void;
@@ -107,10 +120,12 @@ interface TodoControllerChildrenProps {
     currentSubjectId: ISubject["id"],
     subjects: ISubject[],
   ) => void;
-  onRemoveSubjectAndTodos: (subjectId: ISubject["id"]) => void;
   onOpenReset: () => void;
   onCloseReset: () => void;
   onConfirmReset: () => void;
+  onOpenRemoveSubject: (id: ISubject["id"]) => void;
+  onCloseRemoveSubject: () => void;
+  onRemoveSubjectAndTodos: (subjectId: ISubject["id"]) => void;
 }
 
 interface TodoControllerProps {
@@ -121,6 +136,10 @@ const initialTodos: ITodo[] = locals.get("wille_todos") || [];
 const initialSubjects: ISubject[] = locals.get("wille_subjects") || [];
 
 function TodoController({ children }: TodoControllerProps) {
+  // const [showRemoveSubjectModal, setShowRemoveSubjectModal] = useState(false);
+  const [subjectIdToRemove, setSubjectIdToRemove] = useState<
+    ISubject["id"] | null
+  >(null);
   const [showResetModal, setShowResetModal] = useState(false);
   const [filter, setFilter] = useState<ITodoFilter>("ALL");
   const [todos, setTodos] = useState<ITodo[]>(initialTodos);
@@ -235,10 +254,17 @@ function TodoController({ children }: TodoControllerProps) {
     [],
   );
 
+  const handleOpenRemoveSubject = useCallback((id: ISubject["id"]) => {
+    setSubjectIdToRemove(id);
+  }, []);
+  const handleCloseRemoveSubject = useCallback(() => {
+    setSubjectIdToRemove(null);
+  }, []);
   const handleRemoveSubjectAndTodos = useCallback(
     (subjectId: ISubject["id"]) => {
       setSubjects((prev) => prev.filter((s) => s.id !== subjectId));
       setTodos((prev) => prev.filter((t) => t.subjectId !== subjectId));
+      setSubjectIdToRemove(null);
     },
     [],
   );
@@ -248,6 +274,7 @@ function TodoController({ children }: TodoControllerProps) {
       todos: filteredTodos,
       subjects,
       showResetModal,
+      subjectIdToRemove,
       onAddTodo: handleAddTodo,
       onRemoveTodo: handleRemoveTodo,
       onAddSubject: handleAddSubject,
@@ -256,15 +283,18 @@ function TodoController({ children }: TodoControllerProps) {
       onChangeSubjectTitle: handleChangeSubjectTitle,
       onToggleTodoDone: handleToggleTodoDone,
       onChangeTodoSubject: handleChangeTodoSubject,
-      onRemoveSubjectAndTodos: handleRemoveSubjectAndTodos,
       onOpenReset: handleOpenReset,
       onCloseReset: handleCloseReset,
       onConfirmReset: handleConfirmReset,
+      onOpenRemoveSubject: handleOpenRemoveSubject,
+      onCloseRemoveSubject: handleCloseRemoveSubject,
+      onRemoveSubjectAndTodos: handleRemoveSubjectAndTodos,
     }),
     [
       filteredTodos,
       subjects,
       showResetModal,
+      subjectIdToRemove,
       handleAddSubject,
       handleAddTodo,
       handleSelectFilter,
@@ -277,6 +307,8 @@ function TodoController({ children }: TodoControllerProps) {
       handleOpenReset,
       handleCloseReset,
       handleConfirmReset,
+      handleOpenRemoveSubject,
+      handleCloseRemoveSubject,
     ],
   );
 
@@ -326,7 +358,7 @@ const TodoHeader = memo(function TodoHeader({
         css={css`
           display: grid;
           grid-template-columns: 84px 1fr 70px;
-          column-gap: 4px;
+          column-gap: 8px;
         `}
       >
         <Button onClick={onAddSubject}>그룹 추가</Button>
@@ -362,26 +394,36 @@ interface SubjectHeaderProps {
     e: ChangeEvent<HTMLInputElement>,
     subjectId: ISubject["id"],
   ) => void;
-  onRemoveSubjectAndTodos: (subjectId: ISubject["id"]) => void;
+  onOpenRemoveSubject: (id: ISubject["id"]) => void;
 }
 
 const SubjectHeader = memo(function SubjectHeader({
   subject,
   onAddTodo,
   onChangeSubjectTitle,
-  onRemoveSubjectAndTodos,
+  onOpenRemoveSubject,
 }: SubjectHeaderProps) {
   return (
-    <div>
-      <input
+    <div
+      css={css`
+        display: grid;
+        grid-template-columns: 1fr 74px 74px;
+        column-gap: 8px;
+      `}
+    >
+      <Input
         data-testid="input_subject_title"
         value={subject.title}
         onChange={(e) => onChangeSubjectTitle(e, subject.id)}
       />
-      <button onClick={() => onAddTodo(subject.id)}>할 일 추가</button>
-      <button onClick={() => onRemoveSubjectAndTodos(subject.id)}>
+      <Button onClick={() => onAddTodo(subject.id)}>할 일 추가</Button>
+      <Button
+        onClick={() => {
+          onOpenRemoveSubject(subject.id);
+        }}
+      >
         그룹 제거
-      </button>
+      </Button>
     </div>
   );
 });
@@ -413,7 +455,7 @@ const TodoItem = memo(function TodoItem({
 }: TodoItemProps) {
   return (
     <div>
-      <input
+      <Input
         data-testid="input_todo_title"
         value={todo.title}
         onChange={(e) => onChangeTodoTitle(e, todo.id)}
@@ -453,6 +495,9 @@ const SubjectContainer = memo(function SubjectContainer({
   return (
     <div
       css={css`
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
         margin-bottom: 16px;
       `}
       data-testid="subject_container"
