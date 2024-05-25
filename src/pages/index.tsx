@@ -482,6 +482,7 @@ const TodoItem = memo(function TodoItem({
         `}
       >
         <IconButton
+          data-testid={todo.done ? `button_todo_undone` : `button_todo_done`}
           buttonType={todo.done ? "danger" : "complete"}
           onClick={() => onToggleTodoDone(todo.id)}
         >
@@ -489,6 +490,7 @@ const TodoItem = memo(function TodoItem({
         </IconButton>
         {todo.subjectId !== subjects[0].id && (
           <IconButton
+            data-testid="button_move_todo_up"
             onClick={() =>
               onChangeTodoSubject("UP", todo.id, todo.subjectId, subjects)
             }
@@ -498,6 +500,7 @@ const TodoItem = memo(function TodoItem({
         )}
         {todo.subjectId !== subjects[subjects.length - 1].id && (
           <IconButton
+            data-testid="button_move_todo_down"
             onClick={() =>
               onChangeTodoSubject("DOWN", todo.id, todo.subjectId, subjects)
             }
@@ -505,7 +508,10 @@ const TodoItem = memo(function TodoItem({
             <DownSvg />
           </IconButton>
         )}
-        <IconButton onClick={() => onRemoveTodo(todo.id)}>
+        <IconButton
+          data-testid="button_remove_todo"
+          onClick={() => onRemoveTodo(todo.id)}
+        >
           <XSvg />
         </IconButton>
       </div>
