@@ -15,12 +15,8 @@ import colors from "@constants/colors";
 import locals from "@libs/locals";
 import Modal from "@components/Modal";
 import Input from "@components/Input";
-import CheckSvg from "@components/svgs/CheckSvg";
-import DashSvg from "@components/svgs/DashSvg";
 import IconButton from "@components/IconButton";
-import UpSvg from "@components/svgs/UpSvg";
-import DownSvg from "@components/svgs/DownSvg";
-import XSvg from "@components/svgs/XSvg";
+import { CheckSvg, DashSvg, DownSvg, UpSvg, XSvg } from "@components/svgs";
 
 type ITodoFilter = "ALL" | "DONE" | "UNDONE";
 
