@@ -259,9 +259,9 @@ describe("StartPage", () => {
         "input_subject_title",
       )[0] as HTMLInputElement;
       await userEvent.clear(groupTitle);
-      await userEvent.type(groupTitle, "typed group title");
+      await userEvent.type(groupTitle, " typed  group  title");
       await waitFor(async () => {
-        expect(groupTitle.value).toEqual("typed group title");
+        expect(groupTitle.value).toStrictEqual("typed group title");
       });
     });
     unmount();
@@ -284,9 +284,9 @@ describe("StartPage", () => {
         "input_todo_title",
       )[0] as HTMLInputElement;
       await userEvent.clear(todoTitle);
-      await userEvent.type(todoTitle, "typed todo title");
+      await userEvent.type(todoTitle, "  typed  todo  title");
       await waitFor(async () => {
-        expect(todoTitle.value).toEqual("typed todo title");
+        expect(todoTitle.value).toStrictEqual("typed todo title");
       });
     });
     unmount();
