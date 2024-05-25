@@ -162,8 +162,10 @@ function TodoController({ children }: TodoControllerProps) {
       if (cur.done) return acc + 1;
       else return acc;
     }, 0);
-    const progress = Math.abs((doneCount / todos.length) * 100);
+    const progress = Math.round((doneCount / todos.length) * 100);
     let progressText: string;
+
+    if (todos.length === 0) return [0, "😐"];
 
     if (progress === 100) {
       progressText = "😇";
@@ -406,7 +408,8 @@ const TodoHeader = memo(function TodoHeader({
             transform: translateY(-50%);
             cursor: default;
           `}
-          title={`${progress}%`}
+          title={`진척률 : ${progress}%`}
+          data-testid="progress_indicator"
         >
           ( {progressText} )
         </span>
@@ -418,7 +421,9 @@ const TodoHeader = memo(function TodoHeader({
           column-gap: 8px;
         `}
       >
-        <Button onClick={onAddSubject}>그룹 추가</Button>
+        <Button data-testid="button_add_group" onClick={onAddSubject}>
+          그룹 추가
+        </Button>
         <Select
           data-testid="todo_filter_select"
           onChange={(e) => {
@@ -473,7 +478,12 @@ const SubjectHeader = memo(function SubjectHeader({
         value={subject.title}
         onChange={(e) => onChangeSubjectTitle(e, subject.id)}
       />
-      <Button onClick={() => onAddTodo(subject.id)}>할 일 추가</Button>
+      <Button
+        data-testid="button_add_todo"
+        onClick={() => onAddTodo(subject.id)}
+      >
+        할 일 추가
+      </Button>
       <Button
         onClick={() => {
           onOpenRemoveSubject(subject.id);
@@ -533,6 +543,7 @@ const TodoItem = memo(function TodoItem({
         `}
       >
         <IconButton
+          title={todo.done ? "완료 취소" : "완료 처리"}
           data-testid={todo.done ? `button_todo_undone` : `button_todo_done`}
           buttonType={todo.done ? "danger" : "complete"}
           onClick={() => onToggleTodoDone(todo.id)}
@@ -541,6 +552,7 @@ const TodoItem = memo(function TodoItem({
         </IconButton>
         {todo.subjectId !== subjects[0].id && (
           <IconButton
+            title="위 그룹으로 이동"
             data-testid="button_move_todo_up"
             onClick={() =>
               onChangeTodoSubject("UP", todo.id, todo.subjectId, subjects)
@@ -551,6 +563,7 @@ const TodoItem = memo(function TodoItem({
         )}
         {todo.subjectId !== subjects[subjects.length - 1].id && (
           <IconButton
+            title="아래 그룹으로 이동"
             data-testid="button_move_todo_down"
             onClick={() =>
               onChangeTodoSubject("DOWN", todo.id, todo.subjectId, subjects)
@@ -560,6 +573,7 @@ const TodoItem = memo(function TodoItem({
           </IconButton>
         )}
         <IconButton
+          title="할 일 삭제"
           data-testid="button_remove_todo"
           onClick={() => onRemoveTodo(todo.id)}
         >

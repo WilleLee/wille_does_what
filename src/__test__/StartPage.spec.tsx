@@ -23,6 +23,7 @@ function init() {
 9. 그룹 값 변경 o
 10. 할 일의 그룹 위아래 변경 o
 11. 초기화 버튼 클릭 o
+12. 프로그레스 이모지 테스트 o
 */
 
 describe("StartPage", () => {
@@ -267,7 +268,7 @@ describe("StartPage", () => {
     unmount();
   });
 
-  test("should change todo value when changing the input", async () => {
+  test("[9] should change todo value when changing the input", async () => {
     const { unmount } = init();
     const addGroup = screen.getAllByRole("button", {
       name: "그룹 추가",
@@ -292,7 +293,7 @@ describe("StartPage", () => {
     unmount();
   });
 
-  test("[9] should change todo's group when clicking up/down buttons", async () => {
+  test("[10] should change todo's group when clicking up/down buttons", async () => {
     const { unmount } = init();
     const addGroup = screen.getAllByRole("button", {
       name: "그룹 추가",
@@ -329,7 +330,7 @@ describe("StartPage", () => {
     unmount();
   });
 
-  test("[10] should reset all values when clicking the button", async () => {
+  test("[11] should reset all values when clicking the button", async () => {
     const { unmount } = init();
     const resetButton = screen.getAllByRole("button", {
       name: "초기화",
@@ -369,6 +370,61 @@ describe("StartPage", () => {
       expect(subjectTitles).toHaveLength(0);
       const todoTitles = screen.queryAllByTestId("input_todo_title");
       expect(todoTitles).toHaveLength(0);
+    });
+
+    unmount();
+  });
+
+  test("[12] should render an appropriate emoji and title text for todos progress", async () => {
+    const { unmount } = init();
+    const progressIndicator = screen.getAllByTestId(
+      "progress_indicator",
+    )[0] as HTMLSpanElement;
+    expect(progressIndicator.innerHTML).toEqual("( 😐 )");
+    expect(progressIndicator.title).toEqual("진척률 : 0%");
+
+    const addGroup = screen.getAllByTestId("button_add_group")[0];
+    await userEvent.click(addGroup);
+
+    await waitFor(async () => {
+      const addTodo = screen.getAllByTestId("button_add_todo")[0];
+      await userEvent.click(addTodo);
+      await userEvent.click(addTodo);
+      await userEvent.click(addTodo);
+      await userEvent.click(addTodo);
+      await userEvent.click(addTodo);
+
+      await waitFor(async () => {
+        const doneButtons = screen.getAllByTestId("button_todo_done");
+        expect(doneButtons).toHaveLength(5);
+        expect(progressIndicator.innerHTML).toEqual("( 😭 )");
+        expect(progressIndicator.title).toEqual("진척률 : 0%");
+        await userEvent.click(doneButtons[0]);
+        await waitFor(async () => {
+          expect(progressIndicator.innerHTML).toEqual("( 😕 )");
+          expect(progressIndicator.title).toEqual("진척률 : 20%");
+        });
+        await userEvent.click(doneButtons[1]);
+        await waitFor(async () => {
+          expect(progressIndicator.innerHTML).toEqual("( 😐 )");
+          expect(progressIndicator.title).toEqual("진척률 : 40%");
+        });
+        await userEvent.click(doneButtons[2]);
+        await waitFor(async () => {
+          expect(progressIndicator.innerHTML).toEqual("( 😊 )");
+          expect(progressIndicator.title).toEqual("진척률 : 60%");
+        });
+        await userEvent.click(doneButtons[3]);
+        await waitFor(async () => {
+          expect(progressIndicator.innerHTML).toEqual("( 😎 )");
+          expect(progressIndicator.title).toEqual("진척률 : 80%");
+        });
+        await userEvent.click(doneButtons[4]);
+        await waitFor(async () => {
+          expect(progressIndicator.innerHTML).toEqual("( 😇 )");
+          expect(progressIndicator.title).toEqual("진척률 : 100%");
+        });
+      });
     });
 
     unmount();
