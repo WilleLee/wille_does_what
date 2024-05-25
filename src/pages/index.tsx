@@ -232,7 +232,7 @@ function TodoController({ children }: TodoControllerProps) {
 
   const handleChangeTodoTitle = useCallback(
     (e: ChangeEvent<HTMLInputElement>, todoId: ITodo["id"]) => {
-      const value = e.target.value.trimStart();
+      const value = e.target.value.replace(/\s+/gi, "");
       setTodos((prev) =>
         prev.map((t) => (t.id === todoId ? { ...t, title: value } : t)),
       );
@@ -252,7 +252,7 @@ function TodoController({ children }: TodoControllerProps) {
 
   const handleChangeSubjectTitle = useCallback(
     (e: ChangeEvent<HTMLInputElement>, subjectId: ISubject["id"]) => {
-      const value = e.target.value.trimStart();
+      const value = e.target.value.replace(/\s+/gi, "");
       setSubjects((prev) =>
         prev.map((s) => (s.id === subjectId ? { ...s, title: value } : s)),
       );
