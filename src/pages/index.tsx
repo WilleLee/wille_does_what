@@ -352,7 +352,7 @@ const TodoHeader = memo(function TodoHeader({
     >
       <h1
         css={css`
-          margin-bottom: 8px;
+          margin-bottom: 16px;
           font-size: 24px;
           font-weight: 800;
           color: ${colors.grey600};
