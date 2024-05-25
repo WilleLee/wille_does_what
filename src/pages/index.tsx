@@ -15,6 +15,12 @@ import colors from "@constants/colors";
 import locals from "@libs/locals";
 import Modal from "@components/Modal";
 import Input from "@components/Input";
+import CheckSvg from "@components/svgs/CheckSvg";
+import DashSvg from "@components/svgs/DashSvg";
+import IconButton from "@components/IconButton";
+import UpSvg from "@components/svgs/UpSvg";
+import DownSvg from "@components/svgs/DownSvg";
+import XSvg from "@components/svgs/XSvg";
 
 type ITodoFilter = "ALL" | "DONE" | "UNDONE";
 
@@ -226,7 +232,7 @@ function TodoController({ children }: TodoControllerProps) {
 
   const handleChangeTodoTitle = useCallback(
     (e: ChangeEvent<HTMLInputElement>, todoId: ITodo["id"]) => {
-      const value = e.target.value.trimStart();
+      const value = e.target.value.replace(/^\s+/i, "").replace(/\s+/gi, " ");
       setTodos((prev) =>
         prev.map((t) => (t.id === todoId ? { ...t, title: value } : t)),
       );
@@ -246,7 +252,7 @@ function TodoController({ children }: TodoControllerProps) {
 
   const handleChangeSubjectTitle = useCallback(
     (e: ChangeEvent<HTMLInputElement>, subjectId: ISubject["id"]) => {
-      const value = e.target.value.trimStart();
+      const value = e.target.value.replace(/^\s+/i, "").replace(/\s+/gi, " ");
       setSubjects((prev) =>
         prev.map((s) => (s.id === subjectId ? { ...s, title: value } : s)),
       );
@@ -346,7 +352,7 @@ const TodoHeader = memo(function TodoHeader({
     >
       <h1
         css={css`
-          margin-bottom: 8px;
+          margin-bottom: 16px;
           font-size: 24px;
           font-weight: 800;
           color: ${colors.grey600};
@@ -454,35 +460,61 @@ const TodoItem = memo(function TodoItem({
   onRemoveTodo,
 }: TodoItemProps) {
   return (
-    <div>
+    <div
+      css={css`
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      `}
+    >
       <Input
         data-testid="input_todo_title"
         value={todo.title}
         onChange={(e) => onChangeTodoTitle(e, todo.id)}
         disabled={todo.done}
       />
-      <button onClick={() => onToggleTodoDone(todo.id)}>
-        {todo.done ? "완료 취소" : "완료"}
-      </button>
-      {todo.subjectId !== subjects[0].id && (
-        <button
-          onClick={() =>
-            onChangeTodoSubject("UP", todo.id, todo.subjectId, subjects)
-          }
+      <div
+        css={css`
+          display: grid;
+          grid-template-columns: repeat(4, 26px);
+          grid-template-rows: 26px;
+          column-gap: 4px;
+        `}
+      >
+        <IconButton
+          data-testid={todo.done ? `button_todo_undone` : `button_todo_done`}
+          buttonType={todo.done ? "danger" : "complete"}
+          onClick={() => onToggleTodoDone(todo.id)}
         >
-          위로
-        </button>
-      )}
-      {todo.subjectId !== subjects[subjects.length - 1].id && (
-        <button
-          onClick={() =>
-            onChangeTodoSubject("DOWN", todo.id, todo.subjectId, subjects)
-          }
+          {todo.done ? <DashSvg /> : <CheckSvg />}
+        </IconButton>
+        {todo.subjectId !== subjects[0].id && (
+          <IconButton
+            data-testid="button_move_todo_up"
+            onClick={() =>
+              onChangeTodoSubject("UP", todo.id, todo.subjectId, subjects)
+            }
+          >
+            <UpSvg />
+          </IconButton>
+        )}
+        {todo.subjectId !== subjects[subjects.length - 1].id && (
+          <IconButton
+            data-testid="button_move_todo_down"
+            onClick={() =>
+              onChangeTodoSubject("DOWN", todo.id, todo.subjectId, subjects)
+            }
+          >
+            <DownSvg />
+          </IconButton>
+        )}
+        <IconButton
+          data-testid="button_remove_todo"
+          onClick={() => onRemoveTodo(todo.id)}
         >
-          아래로
-        </button>
-      )}
-      <button onClick={() => onRemoveTodo(todo.id)}>제거</button>
+          <XSvg />
+        </IconButton>
+      </div>
     </div>
   );
 });

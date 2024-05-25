@@ -14,7 +14,7 @@ function init() {
 /*
 1. 초기 렌더 o
 2. 그룹 추가 버튼 클릭 o
-3. 그룹 제거 버튼 클릭 o -> 수정 버전 (모달)
+3. 그룹 제거 버튼 클릭 o -> 수정 버전 (모달) o
 4. 할 일 추가 버튼 클릭 o
 5. 할 일 제거 버튼 클릭 o
 6. 완료 / 완료 취소 버튼 클릭 o
@@ -29,7 +29,7 @@ describe("StartPage", () => {
   afterEach(() => {
     vi.clearAllMocks();
   });
-  test("should do initial render", () => {
+  test("[1] should do initial render", () => {
     const { unmount } = init();
     expect(screen.getAllByText("Wille does WHAT?")[0]).toBeDefined();
     expect(
@@ -46,7 +46,7 @@ describe("StartPage", () => {
     unmount();
   });
 
-  test("should add a new group when clicking the button", async () => {
+  test("[2] should add a new group when clicking the button", async () => {
     const { unmount } = init();
     const button = screen.getAllByRole("button", {
       name: "그룹 추가",
@@ -63,7 +63,7 @@ describe("StartPage", () => {
     unmount();
   });
 
-  test("should remove a group when clicking the button", async () => {
+  test("[3] should remove a group when clicking the button", async () => {
     const { unmount } = init();
 
     const addGroup = screen.getAllByRole("button", {
@@ -110,7 +110,7 @@ describe("StartPage", () => {
     unmount();
   });
 
-  test("should add a new todo when clicking the button", async () => {
+  test("[4] should add a new todo when clicking the button", async () => {
     const { unmount } = init();
     const addSubject = screen.getAllByRole("button", {
       name: "그룹 추가",
@@ -132,7 +132,7 @@ describe("StartPage", () => {
     unmount();
   });
 
-  test("should remove a todo when clicking the button", async () => {
+  test("[5] should remove a todo when clicking the button", async () => {
     const { unmount } = init();
     const addSubject = screen.getAllByRole("button", {
       name: "그룹 추가",
@@ -149,9 +149,7 @@ describe("StartPage", () => {
         "input_todo_title",
       )[0] as HTMLInputElement;
       expect(todo).toBeDefined();
-      const removeTodo = screen.getAllByRole("button", {
-        name: "제거",
-      })[0];
+      const removeTodo = screen.getAllByTestId("button_remove_todo")[0];
       await userEvent.click(removeTodo);
     });
 
@@ -164,7 +162,7 @@ describe("StartPage", () => {
     unmount();
   });
 
-  test("should toggle disabled attribute when clicking the button", async () => {
+  test("[6] should toggle disabled attribute when clicking the button", async () => {
     const { unmount } = init();
     const addSubject = screen.getAllByRole("button", {
       name: "그룹 추가",
@@ -181,9 +179,7 @@ describe("StartPage", () => {
         "input_todo_title",
       )[0] as HTMLInputElement;
       expect(todo).toBeDefined();
-      const done = screen.getAllByRole("button", {
-        name: "완료",
-      })[0];
+      const done = screen.getAllByTestId("button_todo_done")[0];
       expect(done).toBeDefined();
       await userEvent.click(done);
     });
@@ -192,9 +188,7 @@ describe("StartPage", () => {
         "input_todo_title",
       )[0] as HTMLInputElement;
       expect(todo.disabled).toEqual(true);
-      const undone = screen.getAllByRole("button", {
-        name: "완료 취소",
-      })[0];
+      const undone = screen.getAllByTestId("button_todo_undone")[0];
       expect(undone).toBeDefined();
       await userEvent.click(undone);
     });
@@ -207,7 +201,7 @@ describe("StartPage", () => {
     unmount();
   });
 
-  test("should change todo filters when changing the option", async () => {
+  test("[7] should change todo filters when changing the option", async () => {
     const { unmount } = init();
     const select = screen.getAllByTestId(
       "todo_filter_select",
@@ -226,20 +220,14 @@ describe("StartPage", () => {
       await userEvent.click(addTodo);
     });
     await waitFor(async () => {
-      const doneButtons = screen.getAllByRole("button", {
-        name: "완료",
-      });
+      const doneButtons = screen.getAllByTestId("button_todo_done");
       expect(doneButtons).toHaveLength(2);
       await userEvent.click(doneButtons[0]);
     });
     await waitFor(async () => {
-      const doneButtons = screen.getAllByRole("button", {
-        name: "완료",
-      });
+      const doneButtons = screen.getAllByTestId("button_todo_done");
       expect(doneButtons).toHaveLength(1);
-      const undoneButtons = screen.getAllByRole("button", {
-        name: "완료 취소",
-      });
+      const undoneButtons = screen.getAllByTestId("button_todo_undone");
       expect(undoneButtons).toHaveLength(1);
       await userEvent.selectOptions(select, done.value);
     });
@@ -260,7 +248,7 @@ describe("StartPage", () => {
     unmount();
   });
 
-  test("should change group value when changing the input", async () => {
+  test("[8] should change group value when changing the input", async () => {
     const { unmount } = init();
     const addGroup = screen.getAllByRole("button", {
       name: "그룹 추가",
@@ -271,9 +259,9 @@ describe("StartPage", () => {
         "input_subject_title",
       )[0] as HTMLInputElement;
       await userEvent.clear(groupTitle);
-      await userEvent.type(groupTitle, "typed group title");
+      await userEvent.type(groupTitle, " typed  group  title");
       await waitFor(async () => {
-        expect(groupTitle.value).toEqual("typed group title");
+        expect(groupTitle.value).toStrictEqual("typed group title");
       });
     });
     unmount();
@@ -296,15 +284,15 @@ describe("StartPage", () => {
         "input_todo_title",
       )[0] as HTMLInputElement;
       await userEvent.clear(todoTitle);
-      await userEvent.type(todoTitle, "typed todo title");
+      await userEvent.type(todoTitle, "  typed  todo  title");
       await waitFor(async () => {
-        expect(todoTitle.value).toEqual("typed todo title");
+        expect(todoTitle.value).toStrictEqual("typed todo title");
       });
     });
     unmount();
   });
 
-  test("should change todo's group when clicking up / down buttons", async () => {
+  test("[9] should change todo's group when clicking up/down buttons", async () => {
     const { unmount } = init();
     const addGroup = screen.getAllByRole("button", {
       name: "그룹 추가",
@@ -321,9 +309,7 @@ describe("StartPage", () => {
       const group1 = screen.getAllByTestId("subject_container")[0];
       const todo = screen.getAllByTestId("input_todo_title")[0];
       expect(group1).toContain(todo);
-      const downButton = screen.getAllByRole("button", {
-        name: "아래로",
-      })[0];
+      const downButton = screen.getAllByTestId("button_move_todo_down")[0];
       await userEvent.click(downButton);
     });
     await waitFor(async () => {
@@ -331,9 +317,7 @@ describe("StartPage", () => {
       const todo = screen.getAllByTestId("input_todo_title")[0];
       expect(group1).not.toContain(todo);
       expect(group2).toContain(todo);
-      const upButton = screen.getAllByRole("button", {
-        name: "위로",
-      })[0];
+      const upButton = screen.getAllByTestId("button_move_todo_up")[0];
       await userEvent.click(upButton);
     });
     await waitFor(async () => {
@@ -345,7 +329,7 @@ describe("StartPage", () => {
     unmount();
   });
 
-  test("should reset all values when clicking the button", async () => {
+  test("[10] should reset all values when clicking the button", async () => {
     const { unmount } = init();
     const resetButton = screen.getAllByRole("button", {
       name: "초기화",

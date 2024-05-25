@@ -58,7 +58,7 @@ function Layout({ children }: LayoutProps) {
           width: 100%;
           max-width: 380px;
           margin: 0 auto;
-          padding: 16px 0;
+          padding: 16px 8px;
           background: ${colors.background};
         `}
       >

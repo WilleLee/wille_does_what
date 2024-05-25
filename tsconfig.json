@@ -31,7 +31,6 @@
       "@models/*": ["models/*"],
       "@pages/*": ["pages/*"],
       "@constants/*": ["constants/*"],
-      "@assets/*": ["assets/*"],
       "@/*": ["*"]
     }
   },
