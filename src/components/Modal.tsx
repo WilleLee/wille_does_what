@@ -81,7 +81,11 @@ export default function Modal({
               column-gap: 4px;
             `}
           >
-            <Button danger data-testid="modal_confirm" onClick={onConfirm}>
+            <Button
+              buttonType="danger"
+              data-testid="modal_confirm"
+              onClick={onConfirm}
+            >
               확인
             </Button>
             <Button data-testid="modal_cancel" onClick={onClose}>

@@ -5,14 +5,14 @@ import {
   ForwardedRef,
   ReactNode,
   forwardRef,
+  useMemo,
 } from "react";
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   fullWidth?: boolean;
   fullHeight?: boolean;
-  danger?: boolean;
-  faded?: boolean;
+  buttonType?: "default" | "danger";
 }
 
 const Button = forwardRef(function Button(
@@ -21,12 +21,19 @@ const Button = forwardRef(function Button(
 ) {
   const {
     children,
-    danger = false,
-    faded = false,
+    buttonType = "default",
     fullWidth = true,
     fullHeight = false,
     ...rest
   } = props;
+  const [back, activeBack] = useMemo(() => {
+    switch (buttonType) {
+      case "danger":
+        return [colors.red500, colors.red700];
+      default:
+        return [colors.grey500, colors.grey700];
+    }
+  }, [buttonType]);
   return (
     <button
       css={css`
@@ -39,11 +46,7 @@ const Button = forwardRef(function Button(
         height: ${fullHeight ? "100%" : "36px"};
         border-radius: 10px;
         -webkit-font-smoothing: antialiased;
-        background: ${danger
-          ? colors.red500
-          : faded
-          ? colors.grey400
-          : colors.grey500};
+        background: ${back};
         color: ${colors.white};
         font-size: 13px;
         font-weight: 600;
@@ -60,11 +63,7 @@ const Button = forwardRef(function Button(
           cursor: not-allowed;
         }
         &:active {
-          background: ${danger
-            ? colors.red700
-            : faded
-            ? colors.grey500
-            : colors.grey700};
+          background: ${activeBack};
         }
       `}
       ref={ref}

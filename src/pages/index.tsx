@@ -38,6 +38,8 @@ export default function StartPage() {
         subjects,
         showResetModal,
         subjectIdToRemove,
+        progress,
+        progressText,
         onAddSubject,
         onAddTodo,
         onRemoveTodo,
@@ -55,6 +57,8 @@ export default function StartPage() {
       }) => (
         <>
           <TodoHeader
+            progress={progress}
+            progressText={progressText}
             isEmpty={subjects.length === 0}
             onAddSubject={onAddSubject}
             onSelectFilter={onSelectFilter}
@@ -107,6 +111,8 @@ interface TodoControllerChildrenProps {
   subjects: ISubject[];
   showResetModal: boolean;
   subjectIdToRemove: ISubject["id"] | null;
+  progress: number;
+  progressText: string;
   onAddTodo: (subjectId: ISubject["id"]) => void;
   onRemoveTodo: (todoId: ITodo["id"]) => void;
   onAddSubject: () => void;
@@ -150,6 +156,30 @@ function TodoController({ children }: TodoControllerProps) {
   const [filter, setFilter] = useState<ITodoFilter>("ALL");
   const [todos, setTodos] = useState<ITodo[]>(initialTodos);
   const [subjects, setSubjects] = useState<ISubject[]>(initialSubjects);
+
+  const [progress, progressText] = useMemo(() => {
+    const doneCount = todos.reduce((acc, cur) => {
+      if (cur.done) return acc + 1;
+      else return acc;
+    }, 0);
+    const progress = Math.abs((doneCount / todos.length) * 100);
+    let progressText: string;
+
+    if (progress === 100) {
+      progressText = "😇";
+    } else if (progress >= 80) {
+      progressText = "😎";
+    } else if (progress >= 60) {
+      progressText = "😊";
+    } else if (progress >= 40) {
+      progressText = "😐";
+    } else if (progress >= 20) {
+      progressText = "😕";
+    } else {
+      progressText = "😭";
+    }
+    return [progress, progressText];
+  }, [todos]);
 
   const handleConfirmReset = useCallback(() => {
     setTodos([]);
@@ -281,6 +311,8 @@ function TodoController({ children }: TodoControllerProps) {
       subjects,
       showResetModal,
       subjectIdToRemove,
+      progress,
+      progressText,
       onAddTodo: handleAddTodo,
       onRemoveTodo: handleRemoveTodo,
       onAddSubject: handleAddSubject,
@@ -301,6 +333,8 @@ function TodoController({ children }: TodoControllerProps) {
       subjects,
       showResetModal,
       subjectIdToRemove,
+      progress,
+      progressText,
       handleAddSubject,
       handleAddTodo,
       handleSelectFilter,
@@ -333,6 +367,8 @@ function TodoController({ children }: TodoControllerProps) {
 
 interface TodoHeaderProps {
   isEmpty: boolean;
+  progress: number;
+  progressText: string;
   onAddSubject: () => void;
   onSelectFilter: (key: ITodoFilter) => void;
   onOpenReset: () => void;
@@ -340,6 +376,8 @@ interface TodoHeaderProps {
 
 const TodoHeader = memo(function TodoHeader({
   isEmpty,
+  progress,
+  progressText,
   onAddSubject,
   onSelectFilter,
   onOpenReset,
@@ -352,6 +390,7 @@ const TodoHeader = memo(function TodoHeader({
     >
       <h1
         css={css`
+          position: relative;
           margin-bottom: 16px;
           font-size: 24px;
           font-weight: 800;
@@ -359,6 +398,18 @@ const TodoHeader = memo(function TodoHeader({
         `}
       >
         Wille does WHAT?
+        <span
+          css={css`
+            position: absolute;
+            right: 5%;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: default;
+          `}
+          title={`${progress}%`}
+        >
+          ( {progressText} )
+        </span>
       </h1>
       <div
         css={css`
@@ -385,7 +436,7 @@ const TodoHeader = memo(function TodoHeader({
             </option>
           ))}
         </Select>
-        <Button disabled={isEmpty} danger onClick={onOpenReset}>
+        <Button disabled={isEmpty} buttonType="danger" onClick={onOpenReset}>
           초기화
         </Button>
       </div>
